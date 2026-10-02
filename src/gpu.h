@@ -336,7 +336,9 @@ public:
     int support_VK_KHR_device_group() const;
     int support_VK_KHR_driver_properties() const;
     int support_VK_KHR_external_memory() const;
+    int support_VK_KHR_external_memory_fd() const;
     int support_VK_KHR_get_memory_requirements2() const;
+    int support_VK_KHR_image_format_list() const;
     int support_VK_KHR_maintenance1() const;
     int support_VK_KHR_maintenance2() const;
     int support_VK_KHR_maintenance3() const;
@@ -360,7 +362,9 @@ public:
     int support_VK_EXT_buffer_device_address() const;
     int support_VK_EXT_cooperative_matrix_maintenance1() const;
     int support_VK_EXT_descriptor_indexing() const;
+    int support_VK_EXT_external_memory_dma_buf() const;
     int support_VK_EXT_external_memory_host() const;
+    int support_VK_EXT_image_drm_format_modifier() const;
     int support_VK_EXT_memory_budget() const;
     int support_VK_EXT_memory_priority() const;
     int support_VK_EXT_queue_family_foreign() const;

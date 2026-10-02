@@ -382,7 +382,9 @@ public:
     int support_VK_KHR_device_group;
     int support_VK_KHR_driver_properties;
     int support_VK_KHR_external_memory;
+    int support_VK_KHR_external_memory_fd;
     int support_VK_KHR_get_memory_requirements2;
+    int support_VK_KHR_image_format_list;
     int support_VK_KHR_maintenance1;
     int support_VK_KHR_maintenance2;
     int support_VK_KHR_maintenance3;
@@ -406,7 +408,9 @@ public:
     int support_VK_EXT_buffer_device_address;
     int support_VK_EXT_cooperative_matrix_maintenance1;
     int support_VK_EXT_descriptor_indexing;
+    int support_VK_EXT_external_memory_dma_buf;
     int support_VK_EXT_external_memory_host;
+    int support_VK_EXT_image_drm_format_modifier;
     int support_VK_EXT_memory_budget;
     int support_VK_EXT_memory_priority;
     int support_VK_EXT_queue_family_foreign;
@@ -763,7 +767,9 @@ int GpuInfoPrivate::query_extensions()
     support_VK_KHR_device_group = 0;
     support_VK_KHR_driver_properties = 0;
     support_VK_KHR_external_memory = 0;
+    support_VK_KHR_external_memory_fd = 0;
     support_VK_KHR_get_memory_requirements2 = 0;
+    support_VK_KHR_image_format_list = 0;
     support_VK_KHR_maintenance1 = 0;
     support_VK_KHR_maintenance2 = 0;
     support_VK_KHR_maintenance3 = 0;
@@ -787,7 +793,9 @@ int GpuInfoPrivate::query_extensions()
     support_VK_EXT_buffer_device_address = 0;
     support_VK_EXT_cooperative_matrix_maintenance1 = 0;
     support_VK_EXT_descriptor_indexing = 0;
+    support_VK_EXT_external_memory_dma_buf = 0;
     support_VK_EXT_external_memory_host = 0;
+    support_VK_EXT_image_drm_format_modifier = 0;
     support_VK_EXT_memory_budget = 0;
     support_VK_EXT_memory_priority = 0;
     support_VK_EXT_queue_family_foreign = 0;
@@ -831,8 +839,12 @@ int GpuInfoPrivate::query_extensions()
             support_VK_KHR_driver_properties = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_KHR_external_memory") == 0)
             support_VK_KHR_external_memory = exp.specVersion;
+        else if (strcmp(exp.extensionName, "VK_KHR_external_memory_fd") == 0)
+            support_VK_KHR_external_memory_fd = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_KHR_get_memory_requirements2") == 0)
             support_VK_KHR_get_memory_requirements2 = exp.specVersion;
+        else if (strcmp(exp.extensionName, "VK_KHR_image_format_list") == 0)
+            support_VK_KHR_image_format_list = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_KHR_maintenance1") == 0)
             support_VK_KHR_maintenance1 = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_KHR_maintenance2") == 0)
@@ -879,8 +891,12 @@ int GpuInfoPrivate::query_extensions()
             support_VK_EXT_cooperative_matrix_maintenance1 = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_EXT_descriptor_indexing") == 0)
             support_VK_EXT_descriptor_indexing = exp.specVersion;
+        else if (strcmp(exp.extensionName, "VK_EXT_external_memory_dma_buf") == 0)
+            support_VK_EXT_external_memory_dma_buf = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_EXT_external_memory_host") == 0)
             support_VK_EXT_external_memory_host = exp.specVersion;
+        else if (strcmp(exp.extensionName, "VK_EXT_image_drm_format_modifier") == 0)
+            support_VK_EXT_image_drm_format_modifier = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_EXT_memory_budget") == 0)
             support_VK_EXT_memory_budget = exp.specVersion;
         else if (strcmp(exp.extensionName, "VK_EXT_memory_priority") == 0)
@@ -914,6 +930,7 @@ int GpuInfoPrivate::query_extensions()
     }
 
     const bool support_VK_VERSION_1_1 = physicalDeviceProperties.apiVersion >= VK_MAKE_VERSION(1, 1, 0);
+    const bool support_VK_VERSION_1_2 = physicalDeviceProperties.apiVersion >= VK_MAKE_VERSION(1, 2, 0);
 
     // filter out extensions with unmet dependencies
     // later extensions may depend on earlier ones
@@ -981,6 +998,15 @@ int GpuInfoPrivate::query_extensions()
     {
         support_VK_KHR_shader_float_controls2 = 0;
     }
+
+    if (!support_VK_VERSION_1_1 && !support_VK_KHR_external_memory)
+        support_VK_KHR_external_memory_fd = 0;
+    if (!support_VK_KHR_external_memory_fd)
+        support_VK_EXT_external_memory_dma_buf = 0;
+    if (!support_VK_VERSION_1_1 && !support_VK_KHR_sampler_ycbcr_conversion)
+        support_VK_EXT_image_drm_format_modifier = 0;
+    if (!support_VK_VERSION_1_2 && !support_VK_KHR_image_format_list)
+        support_VK_EXT_image_drm_format_modifier = 0;
 
     if (!support_VK_EXT_shader_atomic_float)
         support_VK_EXT_shader_atomic_float2 = 0;
@@ -2264,9 +2290,19 @@ int GpuInfo::support_VK_KHR_external_memory() const
     return d->support_VK_KHR_external_memory;
 }
 
+int GpuInfo::support_VK_KHR_external_memory_fd() const
+{
+    return d->support_VK_KHR_external_memory_fd;
+}
+
 int GpuInfo::support_VK_KHR_get_memory_requirements2() const
 {
     return d->support_VK_KHR_get_memory_requirements2;
+}
+
+int GpuInfo::support_VK_KHR_image_format_list() const
+{
+    return d->support_VK_KHR_image_format_list;
 }
 
 int GpuInfo::support_VK_KHR_maintenance1() const
@@ -2384,9 +2420,19 @@ int GpuInfo::support_VK_EXT_descriptor_indexing() const
     return d->support_VK_EXT_descriptor_indexing;
 }
 
+int GpuInfo::support_VK_EXT_external_memory_dma_buf() const
+{
+    return d->support_VK_EXT_external_memory_dma_buf;
+}
+
 int GpuInfo::support_VK_EXT_external_memory_host() const
 {
     return d->support_VK_EXT_external_memory_host;
+}
+
+int GpuInfo::support_VK_EXT_image_drm_format_modifier() const
+{
+    return d->support_VK_EXT_image_drm_format_modifier;
 }
 
 int GpuInfo::support_VK_EXT_memory_budget() const
@@ -4093,8 +4139,12 @@ VulkanDevice::VulkanDevice(int device_index)
         enabledExtensions.push_back("VK_KHR_driver_properties");
     if (info.support_VK_KHR_external_memory())
         enabledExtensions.push_back("VK_KHR_external_memory");
+    if (info.support_VK_KHR_external_memory_fd())
+        enabledExtensions.push_back("VK_KHR_external_memory_fd");
     if (info.support_VK_KHR_get_memory_requirements2())
         enabledExtensions.push_back("VK_KHR_get_memory_requirements2");
+    if (info.support_VK_KHR_image_format_list())
+        enabledExtensions.push_back("VK_KHR_image_format_list");
     if (info.support_VK_KHR_maintenance1())
         enabledExtensions.push_back("VK_KHR_maintenance1");
     if (info.support_VK_KHR_maintenance2())
@@ -4141,8 +4191,12 @@ VulkanDevice::VulkanDevice(int device_index)
         enabledExtensions.push_back("VK_EXT_cooperative_matrix_maintenance1");
     if (info.support_VK_EXT_descriptor_indexing())
         enabledExtensions.push_back("VK_EXT_descriptor_indexing");
+    if (info.support_VK_EXT_external_memory_dma_buf())
+        enabledExtensions.push_back("VK_EXT_external_memory_dma_buf");
     if (info.support_VK_EXT_external_memory_host())
         enabledExtensions.push_back("VK_EXT_external_memory_host");
+    if (info.support_VK_EXT_image_drm_format_modifier())
+        enabledExtensions.push_back("VK_EXT_image_drm_format_modifier");
     if (info.support_VK_EXT_memory_budget())
         enabledExtensions.push_back("VK_EXT_memory_budget");
     if (info.support_VK_EXT_memory_priority())
