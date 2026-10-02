@@ -294,6 +294,12 @@ int NetPrivate::forward_layer(int layer_index, std::vector<Mat>& blob_mats, std:
     {
         pending_dispatch_threshold = 256 * 1024; // 256K
     }
+    if (vkdev->info.vendor_id() == 0x8086 && vkdev->info.type() == 1 && pending_dispatch_threshold < 256 * 1024)
+    {
+        // intel integrated gpu scores like a mobile gpu, splitting a small net
+        // into many synchronous submissions costs more than it saves
+        pending_dispatch_threshold = 256 * 1024; // 256K
+    }
     if (cmd.pending_dispatch_total() > pending_dispatch_threshold)
     {
         cmd_submit_and_wait = true;
