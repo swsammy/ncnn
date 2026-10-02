@@ -13,7 +13,11 @@ afp activation_afp(afp v, int activation_type, float activation_param_0, float a
     if (activation_type == 2)
     {
         const afp slope = afp(activation_param_0);
-        v = v < afp(0.f) ? v * slope : v;
+        // max or min instead of a compare and select: with fp16 arithmetic,
+        // Mesa's Intel compiler can generate code that hangs Gen9 GPUs when
+        // the shader runs at SIMD32. slope <= 1 picks max, slope > 1 picks min,
+        // decided once from the constant
+        v = activation_param_0 <= 1.f ? max(v, v * slope) : min(v, v * slope);
     }
     if (activation_type == 3)
     {
@@ -52,7 +56,11 @@ afpvec4 activation_afpvec4(afpvec4 v, int activation_type, float activation_para
     if (activation_type == 2)
     {
         const afp slope = afp(activation_param_0);
-        v = mix(v, v * afp(slope), lessThan(v, afpvec4(0.f)));
+        // max or min instead of a compare and select: with fp16 arithmetic,
+        // Mesa's Intel compiler can generate code that hangs Gen9 GPUs when
+        // the shader runs at SIMD32. slope <= 1 picks max, slope > 1 picks min,
+        // decided once from the constant
+        v = activation_param_0 <= 1.f ? max(v, v * slope) : min(v, v * slope);
     }
     if (activation_type == 3)
     {
